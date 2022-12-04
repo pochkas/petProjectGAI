@@ -11,8 +11,7 @@ import java.util.List;
 
 
     @RestController
-    @RequestMapping("/todos")
-    public class ToDoController {
+    public class FineController {
 
         @Autowired
         private DB db;
