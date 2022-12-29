@@ -1,41 +1,40 @@
-package org.example.model;
+package org.example.dto;
 
+import lombok.Data;
 
-import javax.persistence.*;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.Date;
 
 
-@Entity
-@Table(name = "fine")
-public class Fine {
-
-
+@Data
+public class FineDTO {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private  Long fineId;
+    private Long fineId;
 
-    @Column(name="carNumber")
     private String carNumber;
-    @Column(name="username")
+
     private String username;
-    @Column(name="usernameGai")
+
     private String usernameGai;
-    @Column(name="protocolDate")
+
     private Date protocolDate;
-    @Column(name="fine")
+
     private Double fine;
-    @Column(name="court")
+
     private boolean court;
 
-    @Column(name="fineWasPaid")
     private boolean fineWasPaid;
 
-    @Column(name="datePaid")
     private LocalDateTime datePaid;
-    @Column(name="lastDayToPay")
+
     private Date lastDayToPay;
+
+
 
     public Long getFineId() {
         return fineId;
@@ -85,10 +84,6 @@ public class Fine {
         this.fine = fine;
     }
 
-
-
-
-
     public boolean isCourt() {
         return court;
     }
@@ -120,9 +115,4 @@ public class Fine {
     public void setLastDayToPay(Date lastDayToPay) {
         this.lastDayToPay = lastDayToPay;
     }
-
-
-
-
-
 }

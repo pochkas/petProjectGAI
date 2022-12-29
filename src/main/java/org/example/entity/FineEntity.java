@@ -1,16 +1,20 @@
-package org.example.model;
+package org.example.entity;
 
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "fine")
-public class Fine {
-
-
+public class FineEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -120,9 +124,6 @@ public class Fine {
     public void setLastDayToPay(Date lastDayToPay) {
         this.lastDayToPay = lastDayToPay;
     }
-
-
-
 
 
 }

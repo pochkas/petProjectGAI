@@ -1,104 +1,121 @@
 package org.example.controller;
 
-import org.example.model.Fine;
-import org.example.repository.FineRepository;
+import org.example.dto.FineDTO;
+import org.example.entity.FineEntity;
+import org.example.service.FineService;
+import org.example.service.MappingService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
-import java.util.ArrayList;
-import java.util.List;
-
-
 @RestController
+@RequestMapping(value = "/api/v1/fines")
 public class FineController {
 
     @Autowired
-    private FineRepository fineRepository;
+    private FineService fineService;
 
-    private Sort.Direction getSortDirection(String direction) {
-        if (direction.equals("asc")) {
-            return Sort.Direction.ASC;
-        } else if (direction.equals("desc")) {
-            return Sort.Direction.DESC;
+    @Autowired
+    private MappingService mappingService;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+
+
+    @GetMapping()
+    public ResponseEntity findAll(@RequestParam(required = false) String fines, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "2147483647") int size, @RequestParam(defaultValue = "fineId,asc") String[] sort) {
+
+        try {
+
+            return ResponseEntity.ok(mappingService.getAllFine(page, size, sort));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error. Fines have not been found");
         }
 
-        return Sort.Direction.ASC;
     }
 
-    @GetMapping(value = "/api/v1/fines")
-    public List<Fine> findAll( @RequestParam(required = false) String fines, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "2147483647") int size, @RequestParam(defaultValue = "fineId,asc") String[] sort) {
-         PageRequest pr = PageRequest.of(page,size);
 
+    @PostMapping()
+    public ResponseEntity addFine(@RequestBody FineDTO fineDTO) {
+        try {
+            FineEntity fineRequest= modelMapper.map(fineDTO, FineEntity.class);
 
-        List<Order> orders = new ArrayList<Order>();
+            FineEntity fine=fineService.addFine(fineRequest);
 
+            FineDTO fineResponse=modelMapper.map(fine, FineDTO.class);
 
-        if (sort[0].contains(",")) {
+            return  new ResponseEntity<FineDTO>(fineResponse, HttpStatus.CREATED);
 
-            for (String sortOrder : sort) {
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error. Fine has not been added");
+        }
+    }
 
-                String[] _sort = sortOrder.split(",");
-                orders.add(new Order(getSortDirection(_sort[1]), _sort[0]));
-            }
-        } else {
+    @PutMapping()
+    public ResponseEntity update(@RequestBody FineDTO fineDTO) {
+        try {
+            FineEntity fineRequest= modelMapper.map(fineDTO, FineEntity.class);
 
-            orders.add(new Order(getSortDirection(sort[1]), sort[0]));
+            FineEntity fine=fineService.addFine(fineRequest);
+
+            FineDTO fineResponse=modelMapper.map(fine, FineDTO.class);
+
+            return  new ResponseEntity<FineDTO>(fineResponse, HttpStatus.CREATED);
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error. Fine has not been updated");
         }
 
-        return fineRepository.findAll(pr.of(page, size,(Sort.by(orders)))).toList();
+    }
+
+    @DeleteMapping()
+    public ResponseEntity delete(@RequestBody Long fineId) {
+        try {
+            fineService.delete(fineId);
+            return ResponseEntity.ok("Fine was deleted");
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error. Fine was not deleted");
+        }
 
 
     }
 
-
-
-
-
-    @PostMapping(value = "/api/v1/fines")
-    public Fine addFine(@RequestBody Fine fine) {
-
-        return fineRepository.save(fine);
-
-    }
-
-    @PutMapping(value = "/api/v1/fines")
-    public Fine update(@RequestBody Fine fine) {
-        return fineRepository.save(fine);
+    @GetMapping(value = "/{fineId}")
+    public ResponseEntity getFine(@PathVariable Long fineId) {
+        try {
+            return ResponseEntity.ok(fineService.getFine(fineId));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error. Fine has not been found");
+        }
 
     }
 
-    @DeleteMapping(value = "/api/v1/fines")
-    public void delete(@RequestBody Long fineId) {
-        fineRepository.deleteById(fineId);
+    @PatchMapping(value = "/{fineId}/pay")
+    public ResponseEntity pay(@PathVariable Long fineId) {
+        try {
+            fineService.pay(fineId);
+            return ResponseEntity.ok("Fine was payed");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error. Fine was not payed");
+        }
+
 
     }
 
-    @GetMapping(value = "api/v1/fines/{fineId}")
-    public Fine getFine(@PathVariable Long fineId) {
-        return fineRepository.findById(fineId).get();
+    @PatchMapping(value = "/{fineId}/court")
+    public ResponseEntity court(@PathVariable Long fineId) {
+        try {
+            fineService.court(fineId);
+            return ResponseEntity.ok("Sent to court");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error. Was not sent to court");
+        }
 
-    }
-
-    @PatchMapping(value = "/api/v1/fines/{fineId}/pay")
-    public void pay(@PathVariable Long fineId) {
-
-        Fine fine = fineRepository.findById(fineId).get();
-        fine.setFineWasPaid(true);
-        fineRepository.save(fine);
-
-    }
-
-    @PatchMapping(value = "/api/v1/fines/{fineId}/court")
-    public void court(@PathVariable Long fineId) {
-        Fine fine = fineRepository.findById(fineId).get();
-        fine.setCourt(true);
-        fineRepository.save(fine);
     }
 
 
